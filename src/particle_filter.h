@@ -10,9 +10,10 @@
 #define PARTICLE_FILTER_H_
 
 #include "helper_functions.h"
+#include <random>
 
-struct Particle {
-
+struct Particle
+{
 	int id;
 	double x;
 	double y;
@@ -25,13 +26,24 @@ struct Particle {
 
 
 
-class ParticleFilter {
-	
+class ParticleFilter
+{
 	// Number of particles to draw
-	int num_particles; 
+	int num_particles;
 	
-	
-	
+	// Gaussian generators
+	std::default_random_engine gen;
+	std::normal_distribution<double> dist_x;
+	std::normal_distribution<double> dist_y;
+	std::normal_distribution<double> dist_theta;
+	std::discrete_distribution<int> dist_discrete;
+
+	// std deviations
+	double sig_x;
+	double sig_y;
+	double sig_theta;
+
+
 	// Flag, if filter is initialized
 	bool is_initialized;
 	
@@ -76,9 +88,10 @@ public:
 	 * dataAssociation Finds which observations correspond to which landmarks (likely by using
 	 *   a nearest-neighbors data association).
 	 * @param predicted Vector of predicted landmark observations
-	 * @param observations Vector of landmark observations
+	 * @param map_landmarks Map of landmark observations
+	 * @param sensor_range Double value of sensor's range
 	 */
-	void dataAssociation(std::vector<LandmarkObs> predicted, std::vector<LandmarkObs>& observations);
+	void dataAssociation(const std::vector<LandmarkObs>& predicted, const Map &map_landmarks, double sensor_range);
 	
 	/**
 	 * updateWeights Updates the weights for each particle based on the likelihood of the 
@@ -101,7 +114,7 @@ public:
 	 * Set a particles list of associations, along with the associations calculated world x,y coordinates
 	 * This can be a very useful debugging tool to make sure transformations are correct and assocations correctly connected
 	 */
-	Particle SetAssociations(Particle& particle, const std::vector<int>& associations,
+	void SetAssociations(Particle& particle, const std::vector<int>& associations,
 		                     const std::vector<double>& sense_x, const std::vector<double>& sense_y);
 
 	
@@ -112,9 +125,7 @@ public:
 	/**
 	* initialized Returns whether particle filter is initialized yet or not.
 	*/
-	const bool initialized() const {
-		return is_initialized;
-	}
+	const bool initialized() const { return is_initialized; }
 };
 
 
